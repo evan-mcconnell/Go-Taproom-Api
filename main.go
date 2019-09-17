@@ -58,7 +58,18 @@ func createKeg(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateKeg(w http.ResponseWriter, r *http.Request) {
-
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+	for index, item := range kegs {
+		if item.ID == params["id"] {
+			kegs = append(kegs[:index], kegs[index+1:]...)
+			var keg Keg
+			_ = json.NewDecoder(r.Body).Decode(&keg)
+			keg.ID = params["id"]
+			kegs = append(kegs, keg)
+			json.NewEncoder(w).Encode(keg)
+		}
+	}
 }
 
 func deleteKeg(w http.ResponseWriter, r *http.Request) {
@@ -66,8 +77,9 @@ func deleteKeg(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	for index, item := range kegs {
 		if item.ID == params["id"] {
-			kegs = append(kegs[:index], kegs[:index+1]...)
+			kegs = append(kegs[:index], kegs[index+1:]...)
 			break
+
 		}
 	}
 	json.NewEncoder(w).Encode(kegs)
